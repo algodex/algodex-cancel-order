@@ -1,0 +1,23 @@
+{
+ 
+    "algod": {
+      "uri": "https://xna-mainnet-api.algonode.cloud",
+      "token": ""
+    },
+    "indexer": {
+      "uri": "https://mainnet-idx.algonode.cloud",
+      "token": "",
+      "port": 443
+    },
+    "explorer": {
+      "uri": "https://indexer.algoexplorerapi.io",
+      "port": ""
+    },
+    "dexd": {
+      "uri": "https://app.algodex.com/algodex-backend",
+      "apiVersion": 2,
+      "token": ""
+    }
+  
+}
+  

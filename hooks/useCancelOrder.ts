@@ -6,16 +6,17 @@ import {
   isValidAddress,
 } from "@/lib/utils";
 import { PeraWalletConnect } from "@perawallet/connect";
+import { DeflyWalletConnect } from "@blockshake/defly-connect";
 import toast from "react-hot-toast";
 import signer from "../lib/peraSigner";
+import { useEffect, useState } from "react";
 
 function useCancelOrder() {
   const config = require("../config.json");
   const AlgodexAPI = require("@algodex/algodex-sdk");
   const api = new AlgodexAPI({ config });
   const compile = require("@algodex/algodex-sdk/lib/order/compile");
-  const { activeAddress } = useWallet();
-
+  const { activeAddress, activeAccount } = useWallet();
   const getFirstArg = (appArgs: any) => {
     const appArgsDecoded = appArgs.map((arg: any) =>
       Buffer.from(arg, "base64").toString()
@@ -23,17 +24,27 @@ function useCancelOrder() {
     return appArgsDecoded[0];
   };
 
+  async function getWallet() {
+    if (activeAccount?.providerId === "defly") {
+      const deflyWalletRehydrate = new DeflyWalletConnect();
+      await deflyWalletRehydrate.reconnectSession();
+      return deflyWalletRehydrate;
+    }
+    if (activeAccount?.providerId === "pera") {
+      const peraWalletRehydate = new PeraWalletConnect();
+      await peraWalletRehydate.reconnectSession();
+      return peraWalletRehydate;
+    }
+  }
   async function cancelOrder(escrowAddress: string) {
     try {
       if (!(await isValidAddress(escrowAddress))) {
         throw new Error("Escrow address is not valid");
       }
       notifier("Canceling, please wait...", "loading");
-      const peraWalletRehydate = new PeraWalletConnect();
-      await peraWalletRehydate.reconnectSession();
-
+      const wallet = await getWallet();
       const peraSigner = async (orders: any) => {
-        const signedTxn = await signer(orders, peraWalletRehydate);
+        const signedTxn = await signer(orders, wallet);
         return signedTxn;
       };
 
